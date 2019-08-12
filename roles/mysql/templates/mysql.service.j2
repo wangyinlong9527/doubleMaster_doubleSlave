@@ -1,0 +1,10 @@
+[Unit]
+Description=MySQL
+
+[Service]
+User=root
+ExecStart={{mysql_install_path}}/{{mysql_link}}/bin/mysqld_safe {{mysql_install_path}}/{{mysql_link}}/my.cnf
+ExecStop={{mysql_install_path}}/{{mysql_link}}/bin/mysqladmin -uroot -p'{{mysql_root_passwd}}' shutdown -S {{mysql_install_path}}/{{mysql_link}}/mysql.sock
+
+[Install]
+WantedBy=multi-user.target
