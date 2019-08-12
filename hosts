@@ -1,5 +1,5 @@
 [dbmysql]
-db001-hf-aiui   ansible_ssh_host=172.16.154.12   ansible_ssh_pass=thinkbig1  m1=true  
-db002-hf-aiui   ansible_ssh_host=172.16.154.13   ansible_ssh_pass=thinkbig1  s1=true
-db003-hf-aiui   ansible_ssh_host=172.16.154.14   ansible_ssh_pass=thinkbig1  m2=true  
-db004-hf-aiui   ansible_ssh_host=172.16.154.15   ansible_ssh_pass=thinkbig1  s2=true
+wyl01   ansible_ssh_host=192.168.52.128   ansible_ssh_pass=123456  m1=true  
+wyl02   ansible_ssh_host=192.168.52.129   ansible_ssh_pass=123456  s1=true
+wyl03   ansible_ssh_host=192.168.52.130   ansible_ssh_pass=123456  m2=true  
+wyl04   ansible_ssh_host=192.168.52.131   ansible_ssh_pass=123456  s2=true

@@ -4,7 +4,7 @@ mysql_install_path: /usr/local
 mysql_link: mysql
 mysql_port: 3306
 mysql_root_passwd: "123456"
-m1_ip: 172.16.154.12
-m2_ip: 172.16.154.14
+m1_ip: 192.168.52.128
+m2_ip: 192.168.52.130
 repl_user: repl
 repl_passwd: "123456"
