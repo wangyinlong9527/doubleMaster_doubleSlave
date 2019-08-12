@@ -1,0 +1,3 @@
+- include: pre_install.yml
+- include: install_mysql.yml
+- include: change_master_to_cluster.yml

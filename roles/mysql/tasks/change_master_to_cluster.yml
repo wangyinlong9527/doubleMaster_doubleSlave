@@ -1,0 +1,142 @@
+---
+- name: create | {{ repl_user }} | user
+  mysql_user: 
+    login_host: 127.0.0.1
+    login_port: "{{ mysql_port }}"
+    login_user: root 
+    login_password: "{{ mysql_root_passwd }}"
+    name: "{{ repl_user }}"
+    password: "{{ repl_passwd }}"
+    priv: "*.*:all"
+    state: present 
+    host: "%"
+  when: m1 is defined
+  tags:
+    - change_master_to_cluster
+    - create_replica_user
+
+
+
+- name: change| m1 | to | s1
+  mysql_replication:
+    login_unix_socket: "{{ mysql_install_path }}/{{ mysql_link }}/mysql.sock"
+    login_host: 127.0.0.1
+    login_port: "{{ mysql_port }}"
+    login_user: root     
+    login_password: "{{ mysql_root_passwd }}"
+    master_host: "{{ m1_ip }} " 
+    master_user: "{{ repl_user }}" 
+    master_password: "{{ repl_passwd }}"
+    master_port: "{{ mysql_port }}"
+    master_auto_position: "1"
+    mode: changemaster
+  when: s1 is defined
+  tags:
+    - change_master_to_cluster
+    - change_m1_to_s1 
+
+
+- name: change| m1 | to | m2
+  mysql_replication:
+    login_unix_socket: "{{ mysql_install_path }}/{{ mysql_link }}/mysql.sock"
+    login_host: 127.0.0.1
+    login_port: "{{ mysql_port }}"
+    login_user: root
+    login_password: "{{ mysql_root_passwd }}"
+    master_host: "{{ m1_ip }} "
+    master_user: "{{ repl_user }}"
+    master_password: "{{ repl_passwd }}"
+    master_port: "{{ mysql_port }}"
+    master_auto_position: "1"
+    mode: changemaster
+  when: m2 is defined
+  tags:
+    - change_master_to_cluster
+    - change_m1_to_m2
+
+
+
+
+- name: change | m2 | to | s2
+  mysql_replication:
+    login_unix_socket: "{{ mysql_install_path }}/{{ mysql_link }}/mysql.sock"
+    login_host: 127.0.0.1
+    login_port: "{{ mysql_port }}"
+    login_user: root
+    login_password: "{{ mysql_root_passwd }}"
+    master_host: "{{ m2_ip }} "
+    master_user: "{{ repl_user }}"
+    master_password: "{{ repl_passwd }}"
+    master_port: "{{ mysql_port }}"
+    master_auto_position: "1"
+    mode: changemaster
+  when: s2 is defined
+  tags:
+    - change_master_to_cluster
+    - change_m2_to_s2
+
+
+- name: change | m2 | to | m1
+  mysql_replication:
+    login_unix_socket: "{{ mysql_install_path }}/{{ mysql_link }}/mysql.sock"
+    login_host: 127.0.0.1
+    login_port: "{{ mysql_port }}"
+    login_user: root
+    login_password: "{{ mysql_root_passwd }}"
+    master_host: "{{ m2_ip }} "
+    master_user: "{{ repl_user }}"
+    master_password: "{{ repl_passwd }}"
+    master_port: "{{ mysql_port }}"
+    master_auto_position: "1"
+    mode: changemaster
+  when: m1 is defined
+  tags:
+    - change_master_to_cluster
+    - change_m2_to_s2
+
+
+
+- name: start | slave
+  mysql_replication: 
+    login_unix_socket: "{{ mysql_install_path }}/{{ mysql_link }}/mysql.sock"
+    login_user: root 
+    login_host: 127.0.0.1
+    login_port: "{{ mysql_port }}"
+    login_password: "{{ mysql_root_passwd }}"
+    mode: startslave
+  tags: 
+    - change_master_to_cluster
+    - start_slave
+
+
+- name: check | slave
+  wait_for:
+    port: "{{ mysql_port }}"
+    delay: 5
+  tags:
+    - change_master_to_cluster
+    - check_slave
+
+
+
+- name: get | slave | info
+  mysql_replication:
+    login_unix_socket: "{{ mysql_install_path }}/{{ mysql_link }}/mysql.sock"
+    login_host: 127.0.0.1
+    login_user: root
+    login_port: 3306
+    login_password: "{{ mysql_root_passwd }}"
+    mode: getslave
+  register: info
+  tags:
+    - change_master_to_cluster
+    - display_slave_info
+
+
+- name: dispaly | slave | info 
+  debug:
+    msg: "Slave_IO_Running={{ info.Slave_IO_Running }}       Slave_SQL_Running={{ info.Slave_SQL_Running }}"
+  tags:
+    - change_master_to_cluster
+    - display_slave_info
+

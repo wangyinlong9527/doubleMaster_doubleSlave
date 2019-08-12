@@ -1,0 +1,10 @@
+---
+mysql_version: mysql-5.7.27-el7-x86_64
+mysql_install_path: /usr/local
+mysql_link: mysql
+mysql_port: 3306
+mysql_root_passwd: "123456"
+m1_ip: 172.16.154.12
+m2_ip: 172.16.154.14
+repl_user: repl
+repl_passwd: "123456"

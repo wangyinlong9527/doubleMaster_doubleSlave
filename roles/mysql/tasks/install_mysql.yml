@@ -1,0 +1,137 @@
+---
+- name:  unarchive | mysql
+  unarchive:
+    src:  "{{ mysql_version }}.tar.gz"
+    dest: "{{ mysql_install_path }}"
+    owner: mysql
+    group: mysql
+  tags:
+    - install_mysql
+    - unarchive_mysql
+
+
+- name: chown | mysql
+  file: 
+    dest: "{{ mysql_install_path }}/{{mysql_version}}"
+    owner: mysql
+    group: mysql
+    recurse: yes
+  tags:
+    - install_mysql
+    - chown_mysql
+
+
+- name: link | mysql
+  file:
+    src: "{{ mysql_install_path }}/{{mysql_version}}"
+    dest: "{{ mysql_install_path }}/{{ mysql_link }}"
+    owner: mysql
+    group: mysql
+    state: link
+  tags:
+    - install_mysql
+    - link_mysql
+
+
+
+- name: mkdir | log
+  file:
+    path: "{{ mysql_install_path }}/{{ mysql_link }}/log"
+    owner: mysql
+    group: mysql
+    state: directory
+  tags:
+    - install_mysql
+    - mkdir_log
+
+
+
+- name: touch | log
+  file:
+    path: "{{ mysql_install_path }}/{{ mysql_link }}/log/mysqld.log"
+    owner: mysql
+    group: mysql
+    state: touch
+  tags:
+    - install_mysql
+    - touch_mysql_log
+
+
+- name: template | my.cnf
+  template:
+    src: my.cnf.j2
+    dest: "{{ mysql_install_path }}/{{ mysql_link }}/my.cnf"
+    owner: mysql
+    group: mysql
+  tags:
+    - install_mysql
+    - template_my.cnf
+ 
+
+
+- name: init | mysql
+  shell: ./bin/mysqld  --defaults-file={{ mysql_install_path }}/{{ mysql_link }}/my.cnf --initialize  --user=mysql
+  args:
+    chdir: "{{ mysql_install_path }}/{{ mysql_link }}"
+  tags: 
+    - install_mysql
+    - init_mysql
+    
+
+- name: get | mysql | passwd
+  shell: cat log/mysqld.log |grep root@localhost|awk -F ' ' '{print $11}'
+  register: mysql_init_passwd
+  args:  
+    chdir: "{{ mysql_install_path }}/{{ mysql_link }}"
+  tags: 
+    - install_mysql
+    - display_passwd
+
+
+
+- name: display | passwd
+  debug: 
+    msg: "{{ mysql_init_passwd.stdout }}"
+  tags:
+    - install_mysql
+    - display_passwd
+
+
+
+- name: add | mysql | systemd
+  template:
+    src: mysql.service.j2
+    dest: /etc/systemd/system/mysql-{{ mysql_port }}.service
+  tags:
+    - install_mysql
+    - add_mysql_systemd
+
+
+
+- name: start | mysql | service
+  systemd:
+    name: mysql-{{ mysql_port }}
+    daemon_reload: yes
+    enabled: yes
+    state: restarted
+  tags:
+    - install_mysql
+    - start_mysql_service
+
+- name: check | port
+  wait_for:
+    port: "{{ mysql_port }}"
+    delay: 5
+  tags:
+    - install_mysql
+    - check_port
+
+
+- name: alter | passwd
+  shell: ./bin/mysqladmin -uroot -p'{{mysql_init_passwd.stdout}}' -S '{{mysql_install_path}}/{{mysql_link}}/mysql.sock' password '{{ mysql_root_passwd }}'
+  args:
+    chdir: "{{ mysql_install_path }}/{{ mysql_link }}"
+  tags:
+    - install_mysql
+    - alter_passwd
+
